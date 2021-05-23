@@ -1,0 +1,542 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Auth",
+    "description": "Сервис авторизации пользователей.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000/api/v1"
+    }
+  ],
+  "paths": {
+    "/register": {
+      "post": {
+        "summary": "Register user",
+        "operationId": "registerUser",
+        "tags": [
+          "register"
+        ],
+        "requestBody": {
+          "description": "User data.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/User"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "successful operation",
+            "content": {}
+          },
+          "400": {
+            "description": "Invalid email",
+            "content": {}
+          },
+          "409": {
+            "description": "Email already exists",
+            "content": {}
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Login user",
+        "operationId": "loginUser",
+        "requestBody": {
+          "description": "Credential data.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "successful login",
+            "headers": {
+              "Set-Cookie": {
+                "schema": {
+                  "type": "string",
+                  "example": "SESSION_ID=abcde12345; Path=/; HttpOnly; Expires=Fri, 21 May 2021 13:08:51 GMT"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid email or password",
+            "content": {}
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/2f_auth/sync": {
+      "get": {
+        "tags": [
+          "login"
+        ],
+        "summary": "Multi-factor authentication",
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "provisioning url",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisioningURL"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "user already have otp key"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/2f_auth/check": {
+      "post": {
+        "tags": [
+          "login"
+        ],
+        "summary": "check multi-factor authentication code",
+        "requestBody": {
+          "description": "Credential data.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OTP"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "cookieAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "sucsess",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JWT_Token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "wrong code"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/logout": {
+      "post": {
+        "tags": [
+          "logout"
+        ],
+        "summary": "logout user",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/jwt_token"
+          },
+          {
+            "$ref": "#/components/parameters/refresh_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "sucsessful logout"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/refresh": {
+      "post": {
+        "tags": [
+          "jwt_token"
+        ],
+        "summary": "refresh jwt token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/jwt_token"
+          },
+          {
+            "$ref": "#/components/parameters/refresh_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "sucsessful refresh",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JWT_Token"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "wrong refresh token"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/update_user_data": {
+      "patch": {
+        "tags": [
+          "user_data"
+        ],
+        "summary": "update user data",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/jwt_token"
+          },
+          {
+            "$ref": "#/components/parameters/refresh_token"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "credential upadated"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/user_data": {
+      "get": {
+        "tags": [
+          "user_data"
+        ],
+        "summary": "get user data",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/jwt_token"
+          },
+          {
+            "$ref": "#/components/parameters/refresh_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "token valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User_data"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    },
+    "/check_user": {
+      "post": {
+        "tags": [
+          "jwt_token"
+        ],
+        "summary": "validate jwt token",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/jwt_token"
+          },
+          {
+            "$ref": "#/components/parameters/refresh_token"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "token valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User_data"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests"
+          },
+          "500": {
+            "$ref": "#/components/responses/ServerError"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "jwt_token": {
+        "name": "jwt_token",
+        "in": "header",
+        "description": "auth. jwt token.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Token"
+        }
+      },
+      "refresh_token": {
+        "name": "refresh_token",
+        "in": "header",
+        "description": "refresh token.",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/Token"
+        }
+      }
+    },
+    "requestBodies": {
+      "jwt": {
+        "description": "refresh token.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/JWT_Token"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Token": {
+        "type": "object",
+        "required": [
+          "token"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "User": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "example@mail.com"
+          },
+          "password": {
+            "type": "string"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          }
+        }
+      },
+      "User_data": {
+        "required": [
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "example": "example@mail.com"
+          },
+          "first_name": {
+            "type": "string"
+          },
+          "last_name": {
+            "type": "string"
+          },
+          "history": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/History"
+            }
+          }
+        }
+      },
+      "History": {
+        "type": "object",
+        "properties": {
+          "logined_by": {
+            "type": "number"
+          },
+          "user_device_type": {
+            "type": "string"
+          },
+          "user_agent": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateData": {
+        "type": "object",
+        "properties": {
+          "old_password": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "example@mail.com"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "ProvisioningURL": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          }
+        }
+      },
+      "OTP": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        }
+      },
+      "JWT_Token": {
+        "type": "object",
+        "properties": {
+          "jwt_token": {
+            "$ref": "#/components/schemas/Token"
+          },
+          "refresh_token": {
+            "$ref": "#/components/schemas/Token"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "cookieAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "SESSION_ID"
+      }
+    },
+    "responses": {
+      "UnauthorizedError": {
+        "description": "Access token is missing or invalid"
+      },
+      "TooManyRequests": {
+        "description": "Too many requests"
+      },
+      "ServerError": {
+        "description": "something vent wrong"
+      }
+    }
+  }
+}

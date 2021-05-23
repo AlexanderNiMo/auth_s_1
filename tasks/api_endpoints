@@ -1,0 +1,9 @@
+Endpoints:
+1. register (user, password)
+1. login (user, password)
+2. 2f_auth/sync (session_id)
+3. 2f_auth/check ()
+3. logout (jwt_token, all_session)
+4. refresh (refresh_token)
+5. update_user_data (jwt_token)
+7. check_user

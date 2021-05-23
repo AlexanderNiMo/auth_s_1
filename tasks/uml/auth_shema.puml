@@ -1,0 +1,172 @@
+@startuml
+
+actor client #white
+participant server #blue
+database db_postgres #green
+database db_redis #green
+
+== register ==
+
+client -> server : /register
+note left
+data:
+ e-mail
+ password
+end note
+server -> db_postgres: check e-mail
+note left: e-mail
+db_postgres -x server: e-mail exists
+server->client: 409  e-mail exists
+db_postgres -> server: success
+server -> db_postgres: add user
+note left
+data:
+ e-mail
+ password
+end note
+server-> client: redirect /login
+
+newpage
+
+== cred. authentication ==
+client -> server : /login
+note left
+data:
+    e-mail
+    password
+end note
+server -> db_postgres: check credentials
+note left
+data:
+    e-mail
+    password
+end note
+db_postgres -x server: invalid
+server ->client: invalid password or e-mail
+db_postgres -> server: success
+server -> db_redis: {session id: user_id}
+note left: expire 10m
+server -> client: session id
+== qr code authentication ==
+client -> server: /2f_auth/sync
+note left: data: session_id
+server -> db_redis: check session_id
+note left: data: session_id
+db_postgres -x server: invalid session
+server -x client: 401
+db_redis -> server: user_id
+server -> db_postgres: send qr secret
+note left
+data:
+    user_id
+    qr_secret
+end note
+server -> client: provisioning_url
+client -> server: /2f_auth/check
+note left
+data:
+ session_id
+ code
+end note
+server -> db_redis: check session_id
+db_postgres -x server: invalid session
+server -x client: 401
+db_redis -> server: user_id
+server -> db_postgres: user_id
+db_postgres -> server: qr_secret
+server -> server: check user code with secret
+server -x client: wrong code
+server -> db_redis: pop session_id
+server -> db_redis: {refresh_token: user_id}
+note left: expire 10 days
+server -> db_postgres: login data
+note left
+date:
+ user_id
+ user_agent
+ device
+ login_date_time
+end note
+server -> client: jwt_token; refresh token
+
+newpage
+
+== check jwt_token ==
+client -> server: /check_user
+note left: data: jwt_token
+server -> server: check jwt_token
+server -x server: invalid jwt_token
+server -x client: 401
+server -> db_postgres: get user daata
+db_postgres -> server: user_data
+note right
+data:
+    user_id
+    name
+end note
+
+server -> client: user_data
+note right
+data:
+    user_id
+    name
+end note
+
+newpage
+
+== refresh jwt token ==
+
+client -> server: refresh token
+server -> db_redis: check refresh_token
+db_redis -x server: invalid refresh_token
+server -x client: 401
+db_redis -> server: refresh_token data
+server -> db_redis: new refresh token
+server -> client: new jwt_token; new refresh token
+
+newpage
+
+== update user data ==
+
+client -> server: new cred data
+note left
+data:
+ jwt_token
+ new_user_data
+ password
+end note
+server -> server: check jwt token
+server -x client: 401
+note right: check fail
+server -> server: success
+server -> db_postgres: get user data
+db_postgres -> server: user data
+server -> server: check password
+server -x client: 401
+note right: check fail
+server -> server: success
+server -> db_postgres: update user data
+db_postgres -x server: fail
+note right: details
+server->client: 409
+note right: details
+db_postgres -> server: success
+server -> client: success
+
+newpage
+
+== logout ==
+
+client -> server: /logout
+note left
+data:
+ jwt_token
+ refresh_token
+end note
+server-> server: check jwt_token
+server -x client: 401
+note right: check fail
+server -> db_redis: expire refresh_token
+server -> client: success
+
+@enduml
