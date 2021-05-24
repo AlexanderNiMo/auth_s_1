@@ -1,7 +1,9 @@
-import uuid
-from sqlalchemy.dialects.postgresql import UUID
-from db import db
 import datetime
+import uuid
+
+from sqlalchemy.dialects.postgresql import UUID
+
+from db import db
 
 
 class User(db.Model):

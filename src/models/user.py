@@ -1,5 +1,6 @@
-from pydantic import BaseModel, validate_email, validator
 from typing import Optional
+
+from pydantic import BaseModel, validate_email, validator
 
 
 class User(BaseModel):

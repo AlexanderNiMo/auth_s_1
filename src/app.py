@@ -1,17 +1,19 @@
-# from gevent import monkey
-# monkey.patch_all()
+import json
+import os
 
 from flask import Flask
 from flask_cors import CORS
-import db
 from flask_swagger_ui import get_swaggerui_blueprint
-import json
+
+import db
 
 
 def create_app():
     app = Flask('auth_service')
 
-    app.config.from_pyfile("local.cfg", silent=True)
+    config_file = os.getenv("AUTH_CONFIG", "local.cfg")
+
+    app.config.from_pyfile(config_file, silent=True)
 
     db.init_db(app)
     db.fast_db = db.create_fast_db(app)

@@ -1,4 +1,7 @@
+import abc
 import json
+
+from flask import current_app
 
 
 class EmailExists(Exception):
@@ -27,3 +30,9 @@ class WrongPassword(Exception):
                 'email': self.password
             }
         )
+
+
+class AppService(abc.ABC):
+
+    def __init__(self):
+        self.app_config = current_app.config

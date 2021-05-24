@@ -1,25 +1,23 @@
 import datetime
-from models.user import User
 import hashlib
-import os
 import json
+import os
 from typing import Optional
-import pyotp
-import jwt
-from uuid import uuid4, UUID
-from flask import current_app
+
+from sqlalchemy.exc import IntegrityError
 
 from db import db
 from db.db_models import User as db_User, UserSignIn
-from sqlalchemy.exc import IntegrityError
+from models.user import User
+from .base import AppService
 from .base import EmailExists, WrongPassword
-from db import fast_db
 
 
-class UserController:
+class UserController(AppService):
 
     def __init__(self):
-        self.hash_iteration = 100000
+        super(UserController, self).__init__()
+        self.hash_iteration = self.app_config.get('HASH_ITERATIONS')
 
     def register_user(self, user: User):
         try:
@@ -110,101 +108,3 @@ class UserController:
             salt,
             iterations
         )
-
-
-class SessionController:
-
-    def __init__(self):
-        self.session_expiration = 10*60
-
-    def create_session(self, db_user: db_User):
-        session_id = fast_db.add_user_session(db_user.id, self.session_expiration)
-        return session_id, expiration_from_now(self.session_expiration)
-
-    def check_session_id(self, session_id) -> Optional[str]:
-        return fast_db.get_session_data(session_id)
-
-
-class OTPController:
-
-    def get_provisioning_url(self, db_user):
-        user_id = db_user.id
-        secret = pyotp.random_base32()
-        self._set_user_otp_key(db_user, secret)
-        totp = pyotp.TOTP(secret)
-        return totp.provisioning_uri(name=str(user_id) + '@kino_no.ru', issuer_name='Awesome cinema')
-
-    def check_otp_code(self, db_user: db_User, otp_code: str):
-        totp = pyotp.TOTP(db_user.otp_key)
-        return totp.verify(otp_code)
-
-    def _set_user_otp_key(self, db_user: db_User, otp_key: str):
-        db_user.otp_key = otp_key
-        db.session.add(db_user)
-        db.session.commit()
-
-
-class JWTController:
-
-    def __init__(self):
-        self._secret = current_app.config.get('JWT_SECRET')
-        self.jwt_token_expiration = 15 * 60
-
-    def generate_jwt_pair(self, user_id: UUID):
-
-        jwt_token = jwt.encode(
-            {
-                "user_id": str(user_id),
-                'exp': datetime.datetime.utcnow() + datetime.timedelta(self.jwt_token_expiration),
-                'iat': datetime.datetime.utcnow()
-            },
-            key=self._secret, algorithm="HS256")
-        refresh_token = uuid4()
-        fast_db.add_jwt_refresh_token(user_id, refresh_token)
-
-        return {
-            'jwt_token': jwt_token,
-            'refresh_token': refresh_token,
-        }
-
-    def check_jwt(self, jwt_token: str):
-        try:
-            data = jwt.decode(jwt_token, key=self._secret, algorithms=["HS256"])
-            if datetime.datetime.fromtimestamp(data.get('exp')) < datetime.datetime.utcnow():
-                return None
-        except jwt.DecodeError as ex:
-            return None
-        return data
-
-    def get_jwt_data(self, jwt_token):
-        try:
-            data = jwt.decode(jwt_token, key=self._secret, algorithms=["HS256"])
-        except jwt.DecodeError as ex:
-            return None
-        return data
-
-    def expire_all_refresh_tokens(self, user_id: UUID):
-        fast_db.clear_all_refresh_token(user_id)
-
-    def refresh_jwt(self, user_id: UUID, refresh_token: str):
-        if fast_db.check_jwt_refresh_token(user_id, refresh_token):
-            return self.generate_jwt_pair(user_id)
-        return None
-
-
-class RequestController:
-
-    def __init__(self):
-        self.request_limit = 50
-
-    def check_user_limit(self, user_id):
-        return fast_db.get_user_request_count(user_id) < self.request_limit
-
-
-def expiration_from_now(expiration_in_seconds: int):
-    expires = datetime.datetime.now() + datetime.timedelta(seconds=expiration_in_seconds)
-    return expires.strftime('%a, %d %b %Y %H:%M:%S GMT')
-
-
-def parse_expiration(expiration_in_html_format: str):
-    return datetime.datetime.strptime(expiration_in_html_format, '%a, %d %b %Y %H:%M:%S GMT')

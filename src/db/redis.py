@@ -1,7 +1,9 @@
-import redis
-from .base import FastDB
-from uuid import UUID
 from datetime import datetime
+from uuid import UUID
+
+import redis
+
+from .base import FastDB
 
 
 class RedisDB(FastDB):

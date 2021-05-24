@@ -3,8 +3,7 @@ from json import dumps
 
 from flask import request, jsonify, make_response, redirect, url_for, abort
 
-from services.base import EmailExists, WrongPassword
-from services.user import UserController, SessionController, OTPController, JWTController
+from services import EmailExists, WrongPassword, JWTService, OTPService, SessionService, UserController
 from .utils import required_refresh_token, required_session_id, verify_user_data, required_jwt_auth, limit_requests
 
 
@@ -44,7 +43,7 @@ def login():
         )
         return resp
 
-    session_controller = SessionController()
+    session_controller = SessionService()
     session_id, expires = session_controller.create_session(db_user)
 
     resp = make_response()
@@ -70,7 +69,7 @@ def sync_2f_auth(db_user):
         )
         return resp
 
-    otp_controller = OTPController()
+    otp_controller = OTPService()
     provisioning_url = otp_controller.get_provisioning_url(db_user)
     return jsonify(
         {'url': provisioning_url}
@@ -96,7 +95,7 @@ def check_2f_auth(db_user):
     if db_user.otp_key is None:
         return redirect(url_for('api.sync_2f_auth'))
 
-    otp_controller = OTPController()
+    otp_controller = OTPService()
 
     if not otp_controller.check_otp_code(db_user=db_user, otp_code=code):
         resp = make_response()
@@ -109,7 +108,7 @@ def check_2f_auth(db_user):
     user_controller = UserController()
     user_controller.add_login_record(db_user, request.user_agent.string, request.user_agent.platform)
 
-    jwt_controller = JWTController()
+    jwt_controller = JWTService()
 
     return jsonify(jwt_controller.generate_jwt_pair(user_id=db_user.id))
 
@@ -117,7 +116,7 @@ def check_2f_auth(db_user):
 @required_jwt_auth
 @limit_requests
 def logout(db_user):
-    jwt_controller = JWTController()
+    jwt_controller = JWTService()
     jwt_controller.expire_all_refresh_tokens(db_user.id)
 
     resp = make_response()
@@ -140,7 +139,7 @@ def check_user(db_user):
 @required_refresh_token
 @limit_requests
 def refresh(user_id, refresh_token):
-    jwt_controller = JWTController()
+    jwt_controller = JWTService()
     new_data = jwt_controller.refresh_jwt(user_id, refresh_token)
     if not new_data:
         abort(HTTPStatus.UNAUTHORIZED)
