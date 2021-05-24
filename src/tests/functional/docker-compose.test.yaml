@@ -1,0 +1,40 @@
+version: '3'
+services:
+  auth:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: auth_auth
+    environment:
+      - CONFIG_FILE=local_example.cfg
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwerty
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - auth
+    depends_on:
+      - postgres
+      - redis
+  tester:
+    build:
+      dockerfile: tests.dockerfile
+      context: ./src/tests/functional
+    container_name: auth_tester
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwerty
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AUTH_HOST=auth
+      - AUTH_PORT=5000
+    networks:
+      - auth
+    depends_on:
+      - postgres
+      - redis
+      - auth

@@ -2,7 +2,8 @@ from pytest import fixture
 import requests
 import json
 import pyotp
-from .utils.utils import clear_db, clear_redis_request_limit
+from .utils import clear_db, clear_redis_request_limit
+from .testdata import get_config
 
 
 @fixture
@@ -160,13 +161,13 @@ def wrong_jwt_headers():
 
 
 @fixture
-def drop_base():
-    clear_db()
+def drop_base(config):
+    clear_db(config)
 
 
 @fixture
-def clear_request_limit():
-    clear_redis_request_limit()
+def clear_request_limit(config):
+    clear_redis_request_limit(config)
 
 
 @fixture
@@ -175,8 +176,13 @@ def jwt_token(jwt_token_refresh_token):
 
 
 @fixture
-def root_url():
-    return 'http://localhost:5000/api/v1'
+def config():
+    return get_config()
+
+
+@fixture
+def root_url(config):
+    return f'http://{config.auth_host}:{config.auth_port}/api/v1'
 
 
 @fixture

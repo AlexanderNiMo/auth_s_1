@@ -13,6 +13,8 @@ def init_db(app: Flask):
 
     app.config['SQLALCHEMY_DATABASE_URI'] = (f'postgresql://{postgres_user}:{postgres_password}@'
                                              f'{postgres_host}:{postgres_port}/auth')
+    from .db_models import User, UserSignIn
+
     db.init_app(app)
     if app.config.get('TESTING', False):
         db.drop_all(app=app)

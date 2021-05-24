@@ -1,5 +1,6 @@
 from flask import Blueprint
 
+from .health import get_status
 from .v1 import routes
 
 api_bp = Blueprint('api', __name__, url_prefix='/api')

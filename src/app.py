@@ -18,14 +18,15 @@ def create_app():
 
     app.register_blueprint(create_swaggerui_blueprint(app))
 
-    from .api import api_bp
+    from .api import api_bp, get_status
     app.register_blueprint(api_bp)
+    app.add_url_rule('/health', view_func=get_status, methods=('GET',), endpoint='health')
 
     return app
 
 
 def load_config(app):
-    config_file = os.getenv("AUTH_CONFIG", "local.cfg")
+    config_file = os.getenv("AUTH_CONFIG", "local_example.cfg")
     app.config.from_pyfile(config_file, silent=True)
 
 

@@ -8,7 +8,7 @@ services:
     ports:
     - 5000:5000
     environment:
-      - CONFIG_FILE=local.cfg
+      - CONFIG_FILE=local_example.cfg
       - POSTGRES_HOST=postgres
       - POSTGRES_PORT=5432
       - POSTGRES_USER=postgres

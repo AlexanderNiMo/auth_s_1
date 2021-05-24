@@ -1,8 +1,10 @@
 import psycopg2
 import redis
 
+from functional.testdata import Config
 
-def clear_db():
+
+def clear_db(config: Config):
     sql = '''
     TRUNCATE TABLE users CASCADE;
     '''
@@ -10,10 +12,10 @@ def clear_db():
     connection = psycopg2.connect(
         **{
             'dbname': 'auth',
-            'user': 'postgres',
-            'password': 'qwerty',
-            'host': 'localhost',
-            'port': 5432
+            'user': config.postgres_user,
+            'password': config.postgres_password,
+            'host': config.postgres_host,
+            'port': config.postgres_port
         }
     )
 
@@ -22,8 +24,8 @@ def clear_db():
         connection.commit()
 
 
-def clear_redis_request_limit():
-    r = redis.Redis(host='localhost', port=6379)
+def clear_redis_request_limit(config: Config):
+    r = redis.Redis(host=config.redis_host, port=config.redis_port)
     pattern = f'request:*'
     keys = r.keys(pattern)
     r.delete(*keys)
