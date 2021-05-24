@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from json import dumps
 
-from flask import request, jsonify, make_response, redirect, url_for, abort
+from flask import request, jsonify, make_response, redirect, url_for, abort, current_app
 
 from services import EmailExists, WrongPassword, JWTService, OTPService, SessionService, UserController
 from .utils import required_refresh_token, required_session_id, verify_user_data, required_jwt_auth, limit_requests
@@ -194,3 +194,8 @@ def user_data(db_user):
         }
     )
 
+
+def swagger_json_api():
+    api_file = current_app.config.get('SWAGGER_CONFIG_FILE', f'{current_app.config.root_path}/api/v1/openapi.json')
+    with open(api_file, r'r') as f:
+        return f.read()

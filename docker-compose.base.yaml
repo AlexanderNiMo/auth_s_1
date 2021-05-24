@@ -1,0 +1,28 @@
+version: '3'
+services:
+  postgres:
+    image: postgres:13
+    container_name: auth_postgres
+    environment:
+      - POSTGRES_PASSWORD=qwerty
+      - POSTGRES_DB=auth
+    volumes:
+      - pg_data_users:/var/lib/postgresql/data
+    networks:
+      - auth
+
+  redis:
+    image: redis:6-buster
+    container_name: auth_redis
+    volumes:
+      - rediis_data_users:/data
+    networks:
+      - auth
+
+volumes:
+  pg_data_users:
+  rediis_data_users:
+
+networks:
+  auth:
+    driver: bridge

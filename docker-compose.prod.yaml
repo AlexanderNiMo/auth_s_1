@@ -1,0 +1,22 @@
+version: '3'
+services:
+  auth:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: auth_auth
+    ports:
+    - 5000:5000
+    environment:
+      - CONFIG_FILE=local.cfg
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=qwerty
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    networks:
+      - auth
+    depends_on:
+      - postgres
+      - redis
