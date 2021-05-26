@@ -89,7 +89,7 @@ def check_2f_auth(db_user):
         resp.headers = {
             'content-type': 'application/json'
         }
-        resp.set_data({'message': 'no otp code!'})
+        resp.set_data(dumps({'message': 'no otp code!'}))
         return resp
 
     if db_user.otp_key is None:
@@ -97,13 +97,14 @@ def check_2f_auth(db_user):
 
     otp_controller = OTPService()
 
-    if not otp_controller.check_otp_code(db_user=db_user, otp_code=code):
+    if not otp_controller.check_otp_code(db_user=db_user, otp_code=int(code)):
         resp = make_response()
         resp.status_code = HTTPStatus.BAD_REQUEST
         resp.headers = {
             'content-type': 'application/json'
         }
-        resp.set_data({'message': 'wrong otp code!'})
+        resp.set_data(dumps({'message': 'wrong otp code!'}))
+        return resp
 
     user_controller = UserController()
     user_controller.add_login_record(db_user, request.user_agent.string, request.user_agent.platform)
