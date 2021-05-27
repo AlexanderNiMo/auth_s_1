@@ -15,7 +15,7 @@ def test_too_many_request_check_user(jwt_headers, clear_request_limit, check_use
 
 
 def test_too_many_request_update_data(jwt_headers, clear_request_limit, update_data_url):
-    too_many_request(jwt_headers, update_data_url, 'post')
+    too_many_request(jwt_headers, update_data_url, 'patch')
 
 
 def test_too_many_request_user_data(jwt_headers, clear_request_limit, user_data_url):
@@ -24,7 +24,7 @@ def test_too_many_request_user_data(jwt_headers, clear_request_limit, user_data_
 
 def too_many_request(jwt_headers, url, method):
 
-    for i in range(0, 51):
+    for i in range(0, 61):
         _ = requests.request(
             method,
             url,

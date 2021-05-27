@@ -17,7 +17,6 @@ def test_register_user(session, user, register_url):
     assert 'first_name' in keys
     assert 'last_name' in keys
     assert date.get('email', None) == user.get('email')
-    assert date.get('password', None) == user.get('password')
 
 
 def test_register_user_wrong_format(session, register_url):

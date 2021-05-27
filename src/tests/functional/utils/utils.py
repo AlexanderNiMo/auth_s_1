@@ -28,4 +28,5 @@ def clear_redis_request_limit(config: Config):
     r = redis.Redis(host=config.redis_host, port=config.redis_port)
     pattern = f'request:*'
     keys = r.keys(pattern)
-    r.delete(*keys)
+    if keys:
+        r.delete(*keys)

@@ -96,6 +96,20 @@ def test_2f_check(otp_session_and_key, check_2f_url):
     assert 'refresh_token' in data.keys()
 
 
+def test_2f_check_wrong_code(otp_session_and_key, check_2f_url):
+    session, _ = otp_session_and_key
+
+    resp = session.post(
+        check_2f_url,
+        headers={
+            'content-type': 'application/json'
+        },
+        data=json.dumps({'code': '123'}),
+    )
+
+    assert resp.status_code == HTTPStatus.BAD_REQUEST
+
+
 def test_logout(session, jwt_headers, logout_url, refresh_url):
     resp = session.post(
         logout_url,

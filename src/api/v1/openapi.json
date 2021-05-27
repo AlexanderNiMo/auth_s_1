@@ -401,8 +401,7 @@
         ],
         "properties": {
           "token": {
-            "type": "string",
-            "format": "uuid"
+            "type": "string"
           }
         }
       },

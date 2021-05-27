@@ -1,3 +1,6 @@
+import time
+from http import HTTPStatus
+
 from pytest import fixture
 import requests
 import json
@@ -76,7 +79,7 @@ def wrong_credentials() -> dict:
 
 
 @fixture
-def session() -> requests.Session:
+def session(clear_request_limit) -> requests.Session:
     session = requests.Session()
     return session
 
@@ -89,7 +92,7 @@ def authorised_session(login_user_cookies) -> requests.Session:
 
 
 @fixture
-def otp_session_and_key(session, register_url, login_url, sync_2f_url, user3, drop_base):
+def otp_session_and_key(session, register_url, login_url, sync_2f_url, check_2f_url, user3, drop_base):
 
     user_data = user3
 
@@ -117,12 +120,26 @@ def otp_session_and_key(session, register_url, login_url, sync_2f_url, user3, dr
     )
 
     data = resp.json()
-
     url_data = pyotp.parse_uri(data.get('url'))
-
     totp = pyotp.TOTP(url_data.secret)
 
-    return session, totp.now()
+    while True:
+        otp_code = totp.now()
+
+        resp = session.post(
+            check_2f_url,
+            headers={
+                'content-type': 'application/json'
+            },
+            data=json.dumps({'code': otp_code}),
+        )
+
+        if resp.status_code == HTTPStatus.OK:
+            break
+
+        time.sleep(0.1)
+
+    return session,  otp_code
 
 
 @fixture

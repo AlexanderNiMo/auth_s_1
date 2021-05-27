@@ -14,7 +14,7 @@ api_bp.add_url_rule('/v1/logout', view_func=routes.logout, methods=('POST',), en
 api_bp.add_url_rule('/v1/check_user', view_func=routes.check_user, methods=('POST',), endpoint='check_user')
 api_bp.add_url_rule('/v1/refresh', view_func=routes.refresh, methods=('POST',), endpoint='refresh')
 
-api_bp.add_url_rule('/v1/update_data', view_func=routes.update_user_data, methods=('POST',), endpoint='update_data')
+api_bp.add_url_rule('/v1/update_data', view_func=routes.update_user_data, methods=('PATCH',), endpoint='update_data')
 api_bp.add_url_rule('/v1/user_data', view_func=routes.user_data, methods=('GET',), endpoint='user_data')
 
 api_bp.add_url_rule('/v1/swagger', view_func=routes.swagger_json_api, methods=('GET',), endpoint='swagger_json')

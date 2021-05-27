@@ -5,8 +5,6 @@ __pycache__/
 
 .idea
 
-src/local_example.cfg
-
 # C extensions
 *.so
 

@@ -44,9 +44,9 @@ class UserSignIn(db.Model):
         'listeners': [('after_create', create_partition)],
     }
 
-    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(UUID(as_uuid=True), db.ForeignKey('users.id'))
 
-    logined_by = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    logined_by = db.Column(db.DateTime, default=datetime.datetime.utcnow, primary_key=True)
     user_agent = db.Column(db.Text)
     user_device_type = db.Column(db.Text, nullable=False, primary_key=True)
 

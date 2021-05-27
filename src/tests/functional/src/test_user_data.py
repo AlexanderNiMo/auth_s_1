@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 
 def test_update_user_data(session, jwt_headers, update_data_url, user3):
-    resp = session.post(
+    resp = session.patch(
         update_data_url,
         headers=jwt_headers,
         data=json.dumps(
@@ -23,7 +23,7 @@ def test_update_user_data(session, jwt_headers, update_data_url, user3):
 
 
 def test_update_user_data_wrong_password(session, jwt_headers, update_data_url, user3):
-    resp = session.post(
+    resp = session.patch(
         update_data_url,
         headers=jwt_headers,
         data=json.dumps(
@@ -43,7 +43,7 @@ def test_update_user_data_wrong_password(session, jwt_headers, update_data_url, 
 
 
 def test_update_user_data_wrong_email(session, jwt_headers, update_data_url, user3, registered_user):
-    resp = session.post(
+    resp = session.patch(
         update_data_url,
         headers=jwt_headers,
         data=json.dumps(

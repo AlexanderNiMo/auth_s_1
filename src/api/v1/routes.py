@@ -22,7 +22,10 @@ def register():
         }
         return resp
 
-    return jsonify(user.dict())
+    data = user.dict()
+    data.pop('password')
+
+    return jsonify(data)
 
 
 def login():
