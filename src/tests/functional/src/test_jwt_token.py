@@ -45,5 +45,3 @@ def test_refresh_wrong(session, drop_base, refresh_url, wrong_jwt_headers):
     )
 
     assert resp.status_code == HTTPStatus.UNAUTHORIZED
-
-

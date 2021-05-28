@@ -8,6 +8,9 @@
   "servers": [
     {
       "url": "http://localhost:5000/api/v1"
+    },
+    {
+      "url": "http://auth:5000/api/v1"
     }
   ],
   "paths": {
@@ -246,7 +249,7 @@
         }
       }
     },
-    "/update_user_data": {
+    "/update_data": {
       "patch": {
         "tags": [
           "user_data"
@@ -255,9 +258,6 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/jwt_token"
-          },
-          {
-            "$ref": "#/components/parameters/refresh_token"
           }
         ],
         "requestBody": {
@@ -294,9 +294,6 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/jwt_token"
-          },
-          {
-            "$ref": "#/components/parameters/refresh_token"
           }
         ],
         "responses": {
@@ -331,9 +328,6 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/jwt_token"
-          },
-          {
-            "$ref": "#/components/parameters/refresh_token"
           }
         ],
         "responses": {
@@ -395,15 +389,7 @@
     },
     "schemas": {
       "Token": {
-        "type": "object",
-        "required": [
-          "token"
-        ],
-        "properties": {
-          "token": {
-            "type": "string"
-          }
-        }
+        "type": "string"
       },
       "User": {
         "required": [

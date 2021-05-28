@@ -1,3 +1,5 @@
+from builtins import Exception
+
 import requests
 from time import sleep
 
@@ -16,9 +18,9 @@ def get_status(config):
         result = requests.get(health_url)
         if not result.ok:
             return False
-        data = await result.json()
+        data = result.json()
         return data.get('status', False)
-    except requests.HTTPError as err:
+    except Exception as err:
         return False
 
 

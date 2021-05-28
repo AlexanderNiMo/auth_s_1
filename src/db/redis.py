@@ -8,8 +8,8 @@ from .base import FastDB
 
 class RedisDB(FastDB):
 
-    def __init__(self, redis_connection: redis.Redis):
-        super(RedisDB, self).__init__()
+    def __init__(self, refresh_token_expiration: int, redis_connection: redis.Redis):
+        super(RedisDB, self).__init__(refresh_token_expiration=refresh_token_expiration)
         self.redis = redis_connection
 
     def _session_key(self, session_id: UUID):
@@ -73,6 +73,9 @@ def create_fast_db(app) -> RedisDB:
     host = app.config.get('REDIS_HOST')
     port = app.config.get('REDIS_PORT')
 
+    refresh_token_expiration = app.config.get('JWT_REFRESH_TOKEN_EXPIRATION')
+
     return RedisDB(
+        refresh_token_expiration=refresh_token_expiration,
         redis_connection=redis.Redis(host=host, port=port)
     )

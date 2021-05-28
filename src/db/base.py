@@ -1,12 +1,12 @@
 import uuid
 from abc import ABC, abstractmethod
+from flask import current_app
 
 
 class FastDB(ABC):
 
-    def __init__(self):
-        self.session_expiration = 10 * 60
-        self.refresh_token_expiration = 10 * 60 * 60 * 24
+    def __init__(self, refresh_token_expiration: int):
+        self.refresh_token_expiration = refresh_token_expiration
 
     @abstractmethod
     def get_user_request_count(self, user_id: uuid.UUID) -> int:

@@ -18,4 +18,3 @@ api_bp.add_url_rule('/v1/update_data', view_func=routes.update_user_data, method
 api_bp.add_url_rule('/v1/user_data', view_func=routes.user_data, methods=('GET',), endpoint='user_data')
 
 api_bp.add_url_rule('/v1/swagger', view_func=routes.swagger_json_api, methods=('GET',), endpoint='swagger_json')
-

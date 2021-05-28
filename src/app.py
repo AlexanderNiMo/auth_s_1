@@ -20,7 +20,7 @@ def create_app():
 
     from .api import api_bp, get_status
     app.register_blueprint(api_bp)
-    app.add_url_rule('/health', view_func=get_status, methods=('GET',), endpoint='health')
+    app.add_url_rule('/api/health', view_func=get_status, methods=('GET',), endpoint='health')
 
     return app
 
@@ -32,16 +32,9 @@ def load_config(app):
 
 def create_swaggerui_blueprint(app):
 
-    swagger_config_file = app.config.get('SWAGGER_CONFIG_FILE', f'{app.config.root_path}/api/v1/openapi.json')
-
-    with open(swagger_config_file, r'r') as f:
-       swagger_config = json.load(f)
-
     swaggerui_blueprint = get_swaggerui_blueprint(
         app.config.get('SWAGGER_URL', '/api/docs'),
         app.config.get('API_URL', '/api/v1/swagger'),
-        config=swagger_config,
-
     )
 
     return swaggerui_blueprint

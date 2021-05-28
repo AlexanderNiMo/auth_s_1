@@ -1,4 +1,4 @@
-import requests
+import redis
 from tests.functional.testdata.config import get_config
 from time import sleep
 
@@ -6,14 +6,18 @@ from time import sleep
 def wait_for_redis():
     config = get_config()
 
+    r = redis.Redis(host=config.redis_host, port=config.redis_port)
+
     while True:
         try:
-            requests.get(f'http://{config.redis_host}:{config.redis_port}')
-        except ConnectionRefusedError as e:
+            if r.ping() == 'PONG':
+                break
+        except Exception as e:
             print('Waiting for redis....')
             sleep(1)
         else:
             break
+
 
 if __name__ == '__main__':
     wait_for_redis()

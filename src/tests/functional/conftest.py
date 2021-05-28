@@ -137,7 +137,7 @@ def otp_session_and_key(session, register_url, login_url, sync_2f_url, check_2f_
         if resp.status_code == HTTPStatus.OK:
             break
 
-        time.sleep(0.1)
+        time.sleep(1)
 
     return session,  otp_code
 

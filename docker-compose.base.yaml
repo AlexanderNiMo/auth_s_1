@@ -3,9 +3,8 @@ services:
   postgres:
     image: postgres:13
     container_name: auth_postgres
-    environment:
-      - POSTGRES_PASSWORD=qwerty
-      - POSTGRES_DB=auth
+    env_file:
+      - ./.env
     volumes:
       - pg_data_users:/var/lib/postgresql/data
     networks:

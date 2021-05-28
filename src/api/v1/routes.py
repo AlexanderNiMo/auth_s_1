@@ -51,7 +51,8 @@ def login():
 
     resp = make_response()
     resp.headers = {
-        'Set-Cookie': f'SESSION_ID={session_id}; Path=/; HttpOnly; Expires={expires}'
+        'Set-Cookie': f'SESSION_ID={session_id}; Path=/; HttpOnly; Expires={expires}',
+        'SESSION_ID': f'{session_id}'
     }
 
     return resp

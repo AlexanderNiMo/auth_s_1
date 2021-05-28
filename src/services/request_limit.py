@@ -9,5 +9,4 @@ class RequestService(AppService):
         self.request_limit = self.app_config.get('REQUEST_LIMIT')
 
     def check_user_limit(self, user_id):
-
         return fast_db.get_user_request_count(user_id) < self.request_limit

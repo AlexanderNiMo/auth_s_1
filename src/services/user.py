@@ -73,13 +73,22 @@ class UserController(AppService):
             password_data['iterations']
         )
 
-    def add_login_record(self, user: db_User, user_agent: str, user_device_type: Optional[str]):
+    def add_login_record(self, user: db_User, user_agent: str, user_platform: Optional[str]):
+
+        platforms = {
+            'mobile': 'mobile',
+            'linux': 'web',
+            'windows': 'web',
+            'tv': 'smart'
+        }
+        device_type = 'mobile' if not user_platform in platforms else platforms.get(user_platform)
 
         user.history.append(
             UserSignIn(
                 logined_by=datetime.datetime.utcnow(),
                 user_agent=user_agent,
-                user_device_type='mobile' if not user_device_type else user_device_type)
+                user_device_type=device_type
+            )
         )
 
         db.session.add(user)

@@ -15,6 +15,7 @@ cd Async_API_sprint_1
 Configure:
 
  - AUTH: add file local.cfg to ./src/ (based on local_example.cfg)
+ - Configure .env file based on .env_example
  
 
 Run in dev mode:
