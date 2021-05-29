@@ -10,9 +10,10 @@ def init_db(app: Flask):
     postgres_password = app.config.get('POSTGRES_PASSWORD')
     postgres_host = app.config.get('POSTGRES_HOST')
     postgres_port = app.config.get('POSTGRES_PORT')
+    postgres_db = app.config.get('POSTGRES_DB')
 
     app.config['SQLALCHEMY_DATABASE_URI'] = (f'postgresql://{postgres_user}:{postgres_password}@'
-                                             f'{postgres_host}:{postgres_port}/auth')
+                                             f'{postgres_host}:{postgres_port}/{postgres_db}')
     from .db_models import User, UserSignIn
 
     db.init_app(app)
